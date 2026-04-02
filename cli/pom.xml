@@ -20,7 +20,7 @@
   <parent>
     <groupId>dev.hardwood</groupId>
     <artifactId>hardwood-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.Beta1</version>
   </parent>
 
   <artifactId>hardwood-cli</artifactId>
@@ -33,7 +33,7 @@
     <connection>scm:git:git://github.com/hardwood-hq/hardwood.git</connection>
     <developerConnection>scm:git:git@github.com:hardwood-hq/hardwood.git</developerConnection>
     <url>https://github.com/hardwood-hq/hardwood/</url>
-    <tag>HEAD</tag>
+    <tag>v1.0.0.Beta1</tag>
   </scm>
 
   <dependencyManagement>
@@ -292,11 +292,11 @@
                 </goals>
                 <configuration>
                   <target>
-                    <mkdir dir="${project.build.directory}/native-libs"/>
+                    <mkdir dir="${project.build.directory}/native-libs" />
                     <copy todir="${project.build.directory}/native-libs" flatten="true">
-                      <fileset dir="${project.build.directory}/zstd-native/${zstd.os.dir}/${zstd.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false"/>
-                      <fileset dir="${project.build.directory}/snappy-native/org/xerial/snappy/native/${snappy.os.dir}/${snappy.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false"/>
-                      <fileset dir="${project.build.directory}/lz4-native/net/jpountz/util/${lz4.os.dir}/${lz4.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false"/>
+                      <fileset dir="${project.build.directory}/zstd-native/${zstd.os.dir}/${zstd.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false" />
+                      <fileset dir="${project.build.directory}/snappy-native/org/xerial/snappy/native/${snappy.os.dir}/${snappy.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false" />
+                      <fileset dir="${project.build.directory}/lz4-native/net/jpountz/util/${lz4.os.dir}/${lz4.arch.dir}" includes="${dist.lib.extension}" erroronmissingdir="false" />
                     </copy>
                   </target>
                 </configuration>
