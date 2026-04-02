@@ -16,9 +16,11 @@ on:
         options:
           - 'UPLOAD'
           - 'FULL'
-
-env:
-  JAVA_VERSION: '25.0.2'
+      publish-cli:
+        description: 'Build and publish native CLI binaries'
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   release:
@@ -86,6 +88,7 @@ jobs:
 
   # Build native executable per runner
   package:
+    if: inputs.publish-cli
     needs: release
     name: 'Build with Graal on ${{ matrix.os }}'
     strategy:
@@ -107,7 +110,7 @@ jobs:
       - name: 'Set up Graal'
         uses: graalvm/setup-graalvm@03e8abf916fd0e281b2efe7b2da3378bb0a1d085  # v1 — https://github.com/graalvm/setup-graalvm/releases/tag/v1
         with:
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: '25'
           distribution: 'graalvm-community'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: maven
@@ -131,6 +134,7 @@ jobs:
 
   # Attach CLI binaries to the GitHub release
   publish-cli:
+    if: inputs.publish-cli
     needs: package
     runs-on: ubuntu-latest
     permissions:
