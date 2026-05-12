@@ -235,9 +235,13 @@ Items G3–G12 cluster under one shared question: *would this give an external c
 - **How:** Grep new `run:` blocks for direct `${{ github\.\(event\|head_ref\|ref\|pull_request\|actor\) ` interpolation. Each hit is a defect.
 
 ### G6. Cache poisoning vectors
-- **Rule:** `actions/cache` keys must not be derivable from PR-controlled content unless the cache is **scoped to that PR** and never restored by jobs that run with elevated privileges (push / scheduled / `pull_request_target`).
-- **Why:** A fork PR can populate a cache that a later main-branch job restores, executing attacker-chosen content with main's token.
-- **How:** New or changed `actions/cache` steps. Inspect the `key:` and `restore-keys:` — if they `hashFiles` over paths the PR can modify (e.g. `tools/**`, `Dockerfile`, lock files), confirm the restoring job runs only on `pull_request` (not `pull_request_target` / push to main).
+- **Background:** GitHub Actions caches are scoped by the triggering ref. A workflow restores caches **only** from its own ref's scope and the default branch's scope. Fork-PR caches land in `refs/pull/<N>/merge` scope, which `push`-to-main jobs never consult. As long as every cache-writing job runs in a scope that elevated-context jobs don't read from, broad `restore-keys` are a correctness concern, not a security one. The hardwood repo currently relies entirely on this isolation — `pr-build.yml` and `main-build.yml` share cache-key shapes, but they live in disjoint scopes.
+- **What breaks the isolation.** Three changes turn the broad `restore-keys` from harmless to load-bearing-in-the-wrong-direction:
+  1. A new `pull_request_target` job that uses `actions/cache` — it runs in the **base** repo's scope while executing PR-influenced content.
+  2. A new `workflow_run` job that checks out PR code (via `head_sha` / `head_ref`) and then uses `actions/cache` — same scope-bypass shape.
+  3. Any other cache write reaching an elevated scope via PR-author-controlled input.
+- **Rule:** Each PR that touches `.github/workflows/` must preserve the property that no `actions/cache` step writes into a scope that an elevated-context job will later read. This is a **trigger-surface regression check**, not a per-PR cache-key audit.
+- **How:** Diff `.github/workflows/*.yml`. For new or modified jobs, confirm: (a) no new `pull_request_target` trigger anywhere; (b) any new `workflow_run` job either doesn't `actions/checkout` the PR head or doesn't use `actions/cache`; (c) any trigger change on an existing workflow (e.g. `pull_request` → `pull_request_target`) re-opens the cache-key review under the elevated-context lens.
 
 ### G7. Secret exposure
 - **Rule:** Secrets enter steps only via `env:` — never inline `${{ secrets.X }}` in `run:` strings. No step should print, log, or upload a secret. No step on a fork PR should be granted secrets at all.
