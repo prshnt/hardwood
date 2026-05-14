@@ -325,6 +325,9 @@ public final class FooterScreen {
         lines.add(fact("  Offset indexes",
                 Sizes.dualFormat(stats.offsetIndexBytes()) + "  ("
                         + coverage(stats.offsetIndexCount(), stats.totalChunks()) + ")"));
+        lines.add(fact("  Bloom filters",
+                Sizes.dualFormat(stats.bloomFilterBytes()) + "  ("
+                        + coverage(stats.bloomFilterCount(), stats.totalChunks()) + ")"));
 
         lines.add(Line.empty());
         lines.add(Line.from(new Span(" Dictionary ", Theme.accent().bold())));
@@ -398,6 +401,7 @@ public final class FooterScreen {
             int totalChunks,
             int columnIndexCount, long columnIndexBytes,
             int offsetIndexCount, long offsetIndexBytes,
+            int bloomFilterCount, long bloomFilterBytes,
             int dictionaryCount,
             Map<Encoding, Integer> encodingHistogram,
             Map<CompressionCodec, Integer> codecHistogram) {
@@ -411,6 +415,8 @@ public final class FooterScreen {
         long columnIndexBytes = 0;
         int offsetIndexCount = 0;
         long offsetIndexBytes = 0;
+        int bloomFilterCount = 0;
+        long bloomFilterBytes = 0;
         int dictionaryCount = 0;
         Map<Encoding, Integer> encodingHistogram = new TreeMap<>();
         Map<CompressionCodec, Integer> codecHistogram = new TreeMap<>();
@@ -435,6 +441,10 @@ public final class FooterScreen {
                     offsetIndexCount++;
                     offsetIndexBytes += cc.offsetIndexLength();
                 }
+                if (cmd.bloomFilterLength() != null) {
+                    bloomFilterCount++;
+                    bloomFilterBytes += cmd.bloomFilterLength();
+                }
                 if (dict != null) {
                     dictionaryCount++;
                 }
@@ -447,6 +457,7 @@ public final class FooterScreen {
         return new FooterStats(minDataOffset, maxDataEnd, totalChunks,
                 columnIndexCount, columnIndexBytes,
                 offsetIndexCount, offsetIndexBytes,
+                bloomFilterCount, bloomFilterBytes,
                 dictionaryCount,
                 sortedByCount(encodingHistogram),
                 sortedByCount(codecHistogram));
