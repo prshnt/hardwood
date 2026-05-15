@@ -47,6 +47,8 @@ public class ColumnMetaDataReader {
         Long dictionaryPageOffset = null;
         Statistics statistics = null;
         GeospatialStatistics geospatialStatistics = null;
+        Long bloomFilterOffset = null;
+        Integer bloomFilterLength = null;
 
         while (true) {
             ThriftCompactReader.FieldHeader header = reader.readFieldHeader();
@@ -152,6 +154,22 @@ public class ColumnMetaDataReader {
                         reader.skipField(header.type());
                     }
                     break;
+                case 14: // bloom_filter_offset (optional i64)
+                    if (header.type() == 0x06) {
+                        bloomFilterOffset = reader.readI64();
+                    }
+                    else {
+                        reader.skipField(header.type());
+                    }
+                    break;
+                case 15: // bloom_filter_length (optional i32)
+                    if (header.type() == 0x05) {
+                        bloomFilterLength = reader.readI32();
+                    }
+                    else {
+                        reader.skipField(header.type());
+                    }
+                    break;
                 case 17: // geospatial statistics (optional)
                     if (header.type() == 0x0C) {
                         geospatialStatistics = GeospatialStatisticsReader.read(reader);
@@ -166,8 +184,8 @@ public class ColumnMetaDataReader {
             }
         }
 
-        return new ColumnMetaData(type, encodings, new FieldPath(List.copyOf(pathInSchema)), codec, numValues,
-                totalUncompressedSize, totalCompressedSize, keyValueMetadata, dataPageOffset, dictionaryPageOffset,
-                statistics, geospatialStatistics);
+        return new ColumnMetaData(type, encodings, new FieldPath(List.copyOf(pathInSchema)), codec,
+                numValues, totalUncompressedSize, totalCompressedSize, keyValueMetadata, dataPageOffset,
+                dictionaryPageOffset, statistics, geospatialStatistics, bloomFilterOffset, bloomFilterLength);
     }
 }

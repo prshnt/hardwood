@@ -17,7 +17,7 @@ A Parquet file is organized as follows:
 
 - **FileMetaData** — top-level: row count, schema, key-value metadata (e.g. Spark schema, pandas metadata), and the writer that produced the file (`createdBy`)
 - **RowGroup** — a horizontal partition of the data; each row group contains all columns for a subset of rows
-- **ColumnChunk** — one column within a row group; holds compression codec, byte sizes, and optional statistics (min/max values, null count) used for predicate pushdown
+- **ColumnChunk** — one column within a row group; holds compression codec, byte sizes, and optional statistics (min/max values, null count) used for predicate pushdown. Per-chunk byte ranges for the column index and offset index (when present in the file) are exposed via `columnIndexOffset`/`columnIndexLength` and `offsetIndexOffset`/`offsetIndexLength` on `ColumnChunk`. The bloom-filter byte range (`bloomFilterOffset`/`bloomFilterLength`) is exposed on `ColumnMetaData`, matching its position in the Parquet Thrift schema.
 
 ```java
 import dev.hardwood.metadata.ColumnChunk;

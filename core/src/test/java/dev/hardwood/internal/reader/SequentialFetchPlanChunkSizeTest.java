@@ -105,6 +105,8 @@ class SequentialFetchPlanChunkSizeTest {
                 0L,
                 null,
                 null,
+                null,
+                null,
                 null);
     }
 }
