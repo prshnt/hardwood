@@ -41,6 +41,6 @@ public record ColumnMetaData(
         Long dictionaryPageOffset,
         Statistics statistics,
         GeospatialStatistics geospatialStatistics,
-        Long bloomFilterIndexOffset,
-        Integer bloomFilterIndexLength) {
+        Long bloomFilterOffset,
+        Integer bloomFilterLength) {
 }

@@ -47,8 +47,8 @@ public class ColumnMetaDataReader {
         Long dictionaryPageOffset = null;
         Statistics statistics = null;
         GeospatialStatistics geospatialStatistics = null;
-        Long bloomFilterIndexOffset = null;
-        Integer bloomFilterIndexLength = null;
+        Long bloomFilterOffset = null;
+        Integer bloomFilterLength = null;
 
         while (true) {
             ThriftCompactReader.FieldHeader header = reader.readFieldHeader();
@@ -156,7 +156,7 @@ public class ColumnMetaDataReader {
                     break;
                 case 14: // bloom_filter_offset (optional i64)
                     if (header.type() == 0x06) {
-                        bloomFilterIndexOffset = reader.readI64();
+                        bloomFilterOffset = reader.readI64();
                     }
                     else {
                         reader.skipField(header.type());
@@ -164,7 +164,7 @@ public class ColumnMetaDataReader {
                     break;
                 case 15: // bloom_filter_length (optional i32)
                     if (header.type() == 0x05) {
-                        bloomFilterIndexLength = reader.readI32();
+                        bloomFilterLength = reader.readI32();
                     }
                     else {
                         reader.skipField(header.type());
@@ -184,8 +184,8 @@ public class ColumnMetaDataReader {
             }
         }
 
-        return new ColumnMetaData(type, encodings, new FieldPath(List.copyOf(pathInSchema)), codec, numValues,
-                totalUncompressedSize, totalCompressedSize, keyValueMetadata, dataPageOffset, dictionaryPageOffset,
-                statistics, geospatialStatistics, bloomFilterIndexOffset, bloomFilterIndexLength);
+        return new ColumnMetaData(type, encodings, new FieldPath(List.copyOf(pathInSchema)), codec,
+                numValues, totalUncompressedSize, totalCompressedSize, keyValueMetadata, dataPageOffset,
+                dictionaryPageOffset, statistics, geospatialStatistics, bloomFilterOffset, bloomFilterLength);
     }
 }

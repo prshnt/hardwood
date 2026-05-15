@@ -2800,3 +2800,32 @@ print("\nGenerated nested_v1_no_index.parquet:")
 print(f"  - 1 row group, {NESTED_V1_ROWS} rows, Parquet v1, NO ColumnIndex/OffsetIndex")
 print("  - narrow INT32 (flat) + tags LIST<STRING> (nested, v1 pages)")
 print("  - Closes the row-group-wide mask gate; drives the fallback path")
+
+# =====================================================================
+# Two-column file where only one column carries a bloom filter, so a
+# reader can verify both the populated and the absent shape of the
+# `bloom_filter_offset` / `bloom_filter_length` fields on the same
+# footer parse.
+# =====================================================================
+
+bloom_schema = pa.schema([
+    ('id', pa.int64(), False),
+    ('value', pa.int64(), False),
+])
+bloom_table = pa.table({
+    'id': list(range(64)),
+    'value': [v * 10 for v in range(64)],
+}, schema=bloom_schema)
+
+pq.write_table(
+    bloom_table,
+    'core/src/test/resources/bloom_filter_test.parquet',
+    use_dictionary=False,
+    compression=None,
+    data_page_version='1.0',
+    bloom_filter_options={'id': {'ndv': 64, 'fpp': 0.05}},
+)
+
+print("\nGenerated bloom_filter_test.parquet:")
+print("  - 1 row group, 64 rows, INT64 id + INT64 value")
+print("  - Bloom filter on 'id' only; 'value' has no bloom filter")
